@@ -5,7 +5,7 @@ The function is quite simple: in the main table, you enter labels (e.g. a univer
 In its current implementation, the application is sensitive to any text change that occurs, and is not specific to keywords. But I've still found it useful, and hope you will too!
 
 ## Project Structure
-'''bash
+```bash
 JobCheckerGUI/
 │
 ├── app/
@@ -32,4 +32,4 @@ JobCheckerGUI/
 ├── requirements.txt          # Dependencies file (optional)
 ├── LICENSE                   # License file
 └── README.md                 # README file
-'''
+```
