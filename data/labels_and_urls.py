@@ -1,4 +1,5 @@
 # Build dictionary with pairs of label names and URLs
+
 labels_and_urls = {
     "MIT - Chemistry": "https://chemistry.mit.edu/about/careers/",
     "Stanford - Physics": "https://physics.stanford.edu/about/opportunities",
