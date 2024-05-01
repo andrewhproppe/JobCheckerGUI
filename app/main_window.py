@@ -108,6 +108,7 @@ class MainWindow(QMainWindow):
         try:
             with open("resources/previous_responses.pickle", "rb") as f:
                 old_df = pickle.load(f)
+            # old_df = pd.read_pickle("resources/previous_responses.pickle")
         except FileNotFoundError:
             old_df = pd.DataFrame(columns=["Label", "URL", "Response"])
         self.old_dataframe = old_df
