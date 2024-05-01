@@ -4,6 +4,8 @@ I developed JobCheckerGUI to have a quick and easy way of checking whether or no
 The function is quite simple: in the main table, you enter labels (e.g. a university/company and its department) and the URL corresponding to the webpage where they post jobs. The package BeautifulSoup is used to parse the page and store the text response. It then compares this parsed text with the previous response (stored in a .pickle file) and lets you know whether or not the text on the page has been updated.\
 In its current implementation, the application is sensitive to any text change that occurs, and is not specific to keywords. But I've still found it useful, and hope you will too!
 
+* When you repopulate the table with your own labels and URLs, I would suggest deleting the previous_responses.pickle file the first time you run the program, to prevent any issues with loading it. I have only kept it in this repo for testing purposes.
+
 ## Project Structure
 ```bash
 JobCheckerGUI/
