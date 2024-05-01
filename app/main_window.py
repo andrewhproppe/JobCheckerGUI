@@ -1,81 +1,24 @@
-import requests
-import time
-import pandas as pd
-import pickle
-import os
-import sys
-
-from threading import Thread
-from bs4 import BeautifulSoup
-from PyQt5.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QTableWidgetItem,
-)
-from PyQt5.QtCore import (
-    QUrl,
-    QThread,
-    pyqtSignal,
-    pyqtSlot
-)
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.uic import loadUi
-from pyqtconfig import ConfigManager
+from PyQt5.QtCore import pyqtSlot, QUrl
+from datetime import datetime
+import time
+from threading import Thread
+import os
+import pickle
+import pandas as pd
+from .worker_thread import WorkerThread
+from .utils import text_changed, fetch_soup
 
-config = ConfigManager()
 
-TIMEOUT = 10
-
-sys.setrecursionlimit(10**6)
-
-headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
-}
-
-def fetch_soup(url):
-    try:
-        response = requests.get(url, headers=headers, timeout=TIMEOUT)
-        response.raise_for_status()  # Raise an exception for bad status codes
-        return BeautifulSoup(response.text, "lxml")
-    except (requests.RequestException, ValueError) as e:
-        print(f"Error fetching {url}: {e}")
-        return None
-
-def text_changed(old_text, new_text):
-    return old_text != new_text
-
-class WorkerThread(QThread):
-    update_signal = pyqtSignal(int, str, str, object, tuple)
-
-    def __init__(self, thread_id, label, url, previous_response):
-        super().__init__()
-        self.thread_id = thread_id
-        self.label = label
-        self.url = url
-        self.previous_response = previous_response
-
-    def run(self):
-        response = fetch_soup(self.url).get_text()
-
-        # Compare with old data
-        if self.previous_response:
-            old_text = self.previous_response
-            if text_changed(old_text, response):
-                result = (True, f'Some text for {self.label} has changed.')
-            else:
-                result = (False, f'Text has not changed')
-        else:
-            result = (False, f'No previous response found for "{self.label}"')
-
-        self.update_signal.emit(self.thread_id, self.label, self.url, response, result)
-
-class MyApp(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.new_data = []
 
         # Load the UI file
-        loadUi("JobCheckerGUI.ui", self)
+        loadUi("ui/JobCheckerGUI.ui", self)
 
         # Connect signals and slots
         self.runButton.clicked.connect(self.run_main_in_thread)
@@ -103,6 +46,14 @@ class MyApp(QMainWindow):
             url = item.text()
             QDesktopServices.openUrl(QUrl(url))
 
+    @pyqtSlot()
+    def update_last_checked_date(self):
+        # Get the current date and time
+        current_date_time = datetime.now()
+        # Format the date and time as a string
+        formatted_date_time = current_date_time.strftime("%Y-%m-%d %H:%M:%S")
+        # Set the text of the dateLastCheckedBox
+        self.dateLastCheckedBox.setText(formatted_date_time)
 
     def fetch_urls(self):
         self.progress_bar.setValue(0)
@@ -272,15 +223,3 @@ class MyApp(QMainWindow):
             self.dataTable.setItem(i, 0, QTableWidgetItem(label))
             self.dataTable.setItem(i, 1, QTableWidgetItem(url))
 
-
-if __name__ == "__main__":
-    # Create the application
-    app = QApplication([])
-
-    # Create and show the main window
-    window = MyApp()
-
-    window.show()
-
-    # Start the event loop
-    sys.exit(app.exec_())
